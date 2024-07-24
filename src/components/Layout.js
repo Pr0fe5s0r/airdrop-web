@@ -68,118 +68,118 @@ const makeKycRequest = async (userid) => {
 export default React.forwardRef(function Layout({ children, data }, ref) {
   const { setMoiState, loginData, loginId, isDarkMode, setPoints, moiState, setRewards, rewards, kramaIds, setKramaIds, setLoading, setProof, setKycNationality, authToken } = useContext(ThemeContext);
 
-  const getEligibility = async () => {
-  const proof = await getAllocationProof(loginData.user.userID)
+  // const getEligibility = async () => {
+  // const proof = await getAllocationProof(loginData.user.userID)
   
-  setProof(proof)
-    let response = await fetch(`/api/moi?userId=${loginData.user.userID}&userName=${loginData.userName}&token=${authToken.datToken}`)
+  // setProof(proof)
+  //   let response = await fetch(`/api/moi?userId=${loginData.user.userID}&userName=${loginData.userName}&token=${authToken.datToken}`)
     
-    let data = await response.json();
-    const avatarsCreated = data.interactions.data.filter(function (txn) {
-      try {
-        let namespace = loginData.iome.utils.mDecode(txn.namespace)
-        return (namespace.includes("Avatar") &&
-        txn.action == "Created");
-      } catch (error) {
-        return ;
-      }
-    })
+  //   let data = await response.json();
+  //   const avatarsCreated = data.interactions.data.filter(function (txn) {
+  //     try {
+  //       let namespace = loginData.iome.utils.mDecode(txn.namespace)
+  //       return (namespace.includes("Avatar") &&
+  //       txn.action == "Created");
+  //     } catch (error) {
+  //       return ;
+  //     }
+  //   })
 
-    const avatarsScanned = data.interactions.data.filter(function (txn) {
-      try {
-        let namespace = loginData.iome.utils.mDecode(txn.namespace)
-        return (namespace.includes("Avatar") &&
-        txn.action == "Scanned");
-      } catch (error) {
-        return ;
-      }
-    })
+  //   const avatarsScanned = data.interactions.data.filter(function (txn) {
+  //     try {
+  //       let namespace = loginData.iome.utils.mDecode(txn.namespace)
+  //       return (namespace.includes("Avatar") &&
+  //       txn.action == "Scanned");
+  //     } catch (error) {
+  //       return ;
+  //     }
+  //   })
 
-    const appsCreated = data.interactions.data.filter(function (txn) {
-      try {
-        let namespace = loginData.iome.utils.mDecode(txn.namespace)
-        return (namespace.includes("App") &&
-        txn.action == "Created");
-      } catch (error) {
-        return ;
-      }
-    })
+  //   const appsCreated = data.interactions.data.filter(function (txn) {
+  //     try {
+  //       let namespace = loginData.iome.utils.mDecode(txn.namespace)
+  //       return (namespace.includes("App") &&
+  //       txn.action == "Created");
+  //     } catch (error) {
+  //       return ;
+  //     }
+  //   })
 
-    const appsJoined = data.interactions.data.filter(function (txn) {
-      try {
-        let namespace = loginData.iome.utils.mDecode(txn.namespace)
-        return (namespace.includes("App") &&
-        txn.action == "Joined");
-      } catch (error) {
-        return ;
-      }
-    })
+  //   const appsJoined = data.interactions.data.filter(function (txn) {
+  //     try {
+  //       let namespace = loginData.iome.utils.mDecode(txn.namespace)
+  //       return (namespace.includes("App") &&
+  //       txn.action == "Joined");
+  //     } catch (error) {
+  //       return ;
+  //     }
+  //   })
 
-    let kyc = data.kyc.code == 200 ? true : false
-    let phone_no = data.phone_no.code == 200 ? true : false
-    if (phone_no){
-      phone_no = data.phone_no.data.result.givenAttributes.phone.verified
-    }
-    let email = data.email.code == 200 ? true : false
-    if (email){
-      email = data.email.data.result.givenAttributes.email.verified
-    }
-    //const twitter = data.twitter ? data.twitter.data.level : 0
-    const telegram = data.telegram ? data.telegram.data.level : 0
-    const discord = data.discord ? data.discord.data.level : 0
+  //   let kyc = data.kyc.code == 200 ? true : false
+  //   let phone_no = data.phone_no.code == 200 ? true : false
+  //   if (phone_no){
+  //     phone_no = data.phone_no.data.result.givenAttributes.phone.verified
+  //   }
+  //   let email = data.email.code == 200 ? true : false
+  //   if (email){
+  //     email = data.email.data.result.givenAttributes.email.verified
+  //   }
+  //   //const twitter = data.twitter ? data.twitter.data.level : 0
+  //   const telegram = data.telegram ? data.telegram.data.level : 0
+  //   const discord = data.discord ? data.discord.data.level : 0
     
-    const validator_nodes_may = data.interactions.data.filter(function (txn) {
-      if (txn.namespace == "MOI Net" &&
-          txn.attr == "Validator" &&
-          txn.action == "Created" &&
-          parseInt(txn.instant) < 1650470399)
-          return txn
-    })
-    let rewards_ = 0
+  //   const validator_nodes_may = data.interactions.data.filter(function (txn) {
+  //     if (txn.namespace == "MOI Net" &&
+  //         txn.attr == "Validator" &&
+  //         txn.action == "Created" &&
+  //         parseInt(txn.instant) < 1650470399)
+  //         return txn
+  //   })
+  //   let rewards_ = 0
    
-     data.kramaID.filter(async function (ids) {
-      let krama_response = await fetch(`/api/kramaId?kramaId=${ids.kramaID}`)
-      let krama_data = await krama_response.json()
-      if (krama_data.rewards.data.total_token_summary) {
-       rewards_ = rewards_ +  parseInt(krama_data.rewards.data.total_token_summary)
-        await setRewards(rewards_)
+  //    data.kramaID.filter(async function (ids) {
+  //     let krama_response = await fetch(`/api/kramaId?kramaId=${ids.kramaID}`)
+  //     let krama_data = await krama_response.json()
+  //     if (krama_data.rewards.data.total_token_summary) {
+  //      rewards_ = rewards_ +  parseInt(krama_data.rewards.data.total_token_summary)
+  //       await setRewards(rewards_)
        
-        await setKramaIds((prev)=>
-       [...prev,
-        {
-        kramaId: ids.kramaID,
-        rewards: parseInt(krama_data.rewards.data.total_token_summary)
-       }
-      ])
-    }
-    else return;
-   })
-   if (kyc) {
-    let response = await makeKycRequest(loginData.user.userID)
-    console.log(response)
-    response && setKycNationality(response.kycMethod.nationality)
-    if (!response) {
-      kyc = false
-    }
-   }
+  //       await setKramaIds((prev)=>
+  //      [...prev,
+  //       {
+  //       kramaId: ids.kramaID,
+  //       rewards: parseInt(krama_data.rewards.data.total_token_summary)
+  //      }
+  //     ])
+  //   }
+  //   else return;
+  //  })
+  //  if (kyc) {
+  //   let response = await makeKycRequest(loginData.user.userID)
+  //   console.log(response)
+  //   response && setKycNationality(response.kycMethod.nationality)
+  //   if (!response) {
+  //     kyc = false
+  //   }
+  //  }
     
-    setMoiState((prevData) => ({
-      ...prevData,
-      phone_no: phone_no,
-      email: email,
-      kyc: kyc,
-      validator_nodes: data.validator_nodes.length,
-      validator_nodes_may: validator_nodes_may.length,
-      twitter: 0,//twitter,
-      telegram: telegram,
-      discord: discord,
-      interactions: data.interactions.data.length,
-      createdApp: appsCreated.length,
-      partApp: appsJoined.length,
-      createdAvatar: avatarsCreated.length,
-      scannedAvatar: avatarsScanned.length
-    }));
-  };
+  //   setMoiState((prevData) => ({
+  //     ...prevData,
+  //     phone_no: phone_no,
+  //     email: email,
+  //     kyc: kyc,
+  //     validator_nodes: data.validator_nodes.length,
+  //     validator_nodes_may: validator_nodes_may.length,
+  //     twitter: 0,//twitter,
+  //     telegram: telegram,
+  //     discord: discord,
+  //     interactions: data.interactions.data.length,
+  //     createdApp: appsCreated.length,
+  //     partApp: appsJoined.length,
+  //     createdAvatar: avatarsCreated.length,
+  //     scannedAvatar: avatarsScanned.length
+  //   }));
+  // };
 
 
   useEffect (() => {
@@ -203,10 +203,10 @@ export default React.forwardRef(function Layout({ children, data }, ref) {
     });
   }, [moiState, kramaIds])
 
-  useEffect(() => {
-    loginId && getEligibility();
-    loginId && setLoading(true)
-  }, [loginId]);
+  // useEffect(() => {
+  //   loginId && getEligibility();
+  //   loginId && setLoading(true)
+  // }, [loginId]);
 
   useEffect(() => {
     console.log(kramaIds.length)

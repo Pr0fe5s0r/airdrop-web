@@ -1,3 +1,4 @@
+'use client';
 import { Fragment, useEffect, useRef, useContext, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,8 +14,10 @@ import PopoverModal from "./PopoverModal";
 import copy from 'copy-to-clipboard';
 import { MOI_INITIAL_DATA, INITAL_POINTS } from "../utils/constants";
 import { AccountIcon, WalletIcon, CopyIcon } from '../components/SvgComponent';
+import Web3 from 'web3';
 
 export default function Header(props) {
+  
   const {
     isDarkMode,
     loginId,
@@ -34,11 +37,47 @@ export default function Header(props) {
   const [logoutModal, setLogoutModal] = useState(false);
   const [copyAddress, setCopyAddress] = useState(false)
 
+  const web3 = new Web3('https://sepolia.infura.io/v3/c3045bffb792402cbfadbe48ce90bb8d'); // Replace with your Infura project ID or another Ethereum node provider
+
+  const account = '0xD4E4cbd23a0D2a4B4E4a23bb5CbED205d72f67EC';
+  const privateKey = '0xaffac2e251e7fe452146cba3ce82cc7f9cd3e5da92153961e6d450929a0c3f14';
+  const tokenContractAddress = '0x54fa517f05e11ffa87f4b22ae87d91cec0c2d7e1'; // Replace with the ERC-20 token contract address
+  const spenderAddress = '0x6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b'; // Address you want to approve to spend tokens
+  const amountToApprove = web3.utils.toWei('100', 'ether'); // Amount of tokens to approve (10 tokens in this case)
+
+  const erc20ABI = [
+        // Only the `approve` function ABI
+        {
+            "constant": false,
+            "inputs": [
+                {
+                    "name": "spender",
+                    "type": "address"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint256"
+                }
+            ],
+            "name": "approve",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+
   useEffect(() => {
     if(loginData) {
       handleLogin(loginData.userName);
     }
   }, [loginData])
+  
   const headerSection = useRef(null);
   useEffect(() => {
     const headerSticky = () => {
@@ -74,6 +113,40 @@ export default function Header(props) {
     return undefined
   }, [copyAddress, setCopyAddress, 500])
 
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      console.log("Pressed")
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await web3.eth.getAccounts();
+        handleLogin(accounts[0]); // Assuming handleLogin takes the account address
+        console.log(accounts[0]);
+        const contract = new web3.eth.Contract(erc20ABI, tokenContractAddress);
+
+        // Define the transaction details
+        const txDetails = {
+            nonce: await web3.eth.getTransactionCount(account),
+            gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()), // Use current gas price
+            gasLimit: web3.utils.toHex(100000), // Gas limit for the `approve` function
+            to: tokenContractAddress,
+            data: contract.methods.approve(spenderAddress, amountToApprove).encodeABI(), // Encode ABI data for the `approve` function
+        };
+
+        console.log(txDetails)
+
+        // Sign the transaction
+        const signedTx = await web3.eth.accounts.signTransaction(txDetails, privateKey);
+
+        console.log('Signed Transaction:', signedTx);
+      } catch (error) {
+        console.error("User denied account access or error occurred:", error);
+      }
+    } else {
+      alert('Please install MetaMask to use this feature.');
+    }
+  };
+
   return (
     <header ref={headerSection} className="px-5 lg:px-0 py-3 lg:py-5">
       <PopoverModal logoutModal={logoutModal} setLogoutModal={setLogoutModal}>
@@ -94,20 +167,11 @@ export default function Header(props) {
           </div>
           <div
             className="text-black flex justify-end cursor-pointer px-6"
-            onClick={() => {
-              handleLogin("")
-              setLoginData()
-              setSignature("")
-              setRewards(0)
-              setKramaIds([])
-              setProof([])
-              setKycNationality()
-              setPoints(INITAL_POINTS)
-              setMoiState(MOI_INITIAL_DATA)
-              setLogoutModal(false)
-            }}
+            onClick={connectWallet} // Connect wallet on click
           >
-            <LogoutIcon />
+            <ButtonComponent variant="primary" className="mx-4 px-2 py-2 lg:px-8 lg:py-2 text-sm lg:text-lg">
+              LogIn MOI ID
+            </ButtonComponent>
           </div>
         </div>
       </PopoverModal>
@@ -141,38 +205,13 @@ export default function Header(props) {
 
             <div className="flex items-center justify-end ml-4 lg:flex-1">
               <div>
-                {!moiState["isMoid"].user?.userID ? (
-                  <ButtonComponent
+              <ButtonComponent
                     variant="primary"
                     className="mx-4 px-2 py-2 lg:px-8 lg:py-2 text-sm lg:text-lg"
-                    onClick={() => {
-                      setModalOpen(true);
-                    }}
+                    onClick={connectWallet} // Connect wallet on click
                   >
                     LogIn MOI ID
                   </ButtonComponent>
-                ) : (
-                  <div
-                    className={classNames(
-                      isDarkMode
-                        ? "border-2 border-moi-purple-800"
-                        : "border-2 border-moi-grey",
-                      "rounded-3xl p-[2px] mx-4"
-                    )}
-                  >
-                    <button
-                      onClick={() => setLogoutModal(true)}
-                      className={classNames(
-                        isDarkMode
-                          ? "bg-moi-white-600 text-moi-purple-200"
-                          : "bg-moi-purple-dark text-moi-white-100",
-                        "flex h-full items-center justify-center rounded-3xl px-2 py-2 lg:px-8 lg:py-2 text-sm lg:text-lg font-semibold"
-                      )}
-                    >
-                      {moiState["isMoid"].userName}
-                    </button>
-                  </div>
-                )}
               </div>
               <ToggleComponent />
             </div>
