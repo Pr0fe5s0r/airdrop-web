@@ -170,7 +170,7 @@ export default function Header(props) {
             onClick={connectWallet} // Connect wallet on click
           >
             <ButtonComponent variant="primary" className="mx-4 px-2 py-2 lg:px-8 lg:py-2 text-sm lg:text-lg">
-              LogIn MOI ID
+              Connect MetaMask
             </ButtonComponent>
           </div>
         </div>
@@ -288,4 +288,12 @@ export default function Header(props) {
       </Popover>
     </header>
   );
+}
+
+const walletConnect = async () => {
+  if (typeof window !== 'undefined' && window.ethereum) {
+    await connectWallet();
+  } else {
+    console.error("Ethereum provider is not available.");
+  }
 }
